@@ -7,4 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class IndexController {
     @GetMapping("/")//什么都不输入，默认访问/ 根目录
     public String index(){return "index";}
+
+
 }
