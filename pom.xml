@@ -20,9 +20,14 @@
     <profiles>
         <profile>
             <id>dev</id>
+<!--            <properties>-->
+<!--                <db.url>jdbc:h2:~/community</db.url>-->
+<!--                <db.user>sa</db.user>-->
+<!--                <db.password>123</db.password>-->
+<!--            </properties>-->
             <properties>
-                <db.url>jdbc:h2:~/community</db.url>
-                <db.user>sa</db.user>
+                <db.url>jdbc:mysql://localhost:3306/community</db.url>
+                <db.user>root</db.user>
                 <db.password>123</db.password>
             </properties>
             <activation>
@@ -76,11 +81,11 @@
             <version>23.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.4.199</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.h2database</groupId>-->
+<!--            <artifactId>h2</artifactId>-->
+<!--            <version>1.4.199</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -107,6 +112,19 @@
             <artifactId>ufile-client-java</artifactId>
             <version>2.1.1</version>
         </dependency>
+<!--        =========================================自己加的依赖-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-starter</artifactId>
+            <version>1.1.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>5.2.4</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
@@ -137,11 +155,11 @@
                         <artifactId>mysql-connector-java</artifactId>
                         <version>5.1.45</version>
                     </dependency>
-                    <dependency>
-                        <groupId>com.h2database</groupId>
-                        <artifactId>h2</artifactId>
-                        <version>1.4.199</version>
-                    </dependency>
+<!--                    <dependency>-->
+<!--                        <groupId>com.h2database</groupId>-->
+<!--                        <artifactId>h2</artifactId>-->
+<!--                        <version>1.4.199</version>-->
+<!--                    </dependency>-->
                 </dependencies>
             </plugin>
             <plugin>
@@ -150,11 +168,18 @@
                 <version>1.3.7</version>
                 <dependencies>
                     <dependency>
-                        <groupId>com.h2database</groupId>
-                        <artifactId>h2</artifactId>
-                        <version>1.4.199</version>
+                        <groupId>mysql</groupId>
+                        <artifactId>mysql-connector-java</artifactId>
+                        <version>5.1.45</version>
                     </dependency>
                 </dependencies>
+<!--                <dependencies>-->
+<!--                    <dependency>-->
+<!--                        <groupId>com.h2database</groupId>-->
+<!--                        <artifactId>h2</artifactId>-->
+<!--                        <version>1.4.199</version>-->
+<!--                    </dependency>-->
+<!--                </dependencies>-->
             </plugin>
         </plugins>
     </build>

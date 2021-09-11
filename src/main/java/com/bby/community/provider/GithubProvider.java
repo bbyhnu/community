@@ -41,11 +41,13 @@ public class GithubProvider {
                 .url("https://github.com/login/oauth/access_token")
                 .post(body)
                 .build();
-        //client.conngetParams().setIntParameter("http.socket.timeout", 3000);
+        if (false){
+            return "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&";
+        }
         try (Response response = client.newCall(request).execute()) {
             String string = response.body().string();
             //access_token=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&scope=user&token_type=bearer
-            //System.out.println(string);
+            System.out.println(string);
             String accessToken = string.split("&")[0].split("=")[1];
             return accessToken;
         } catch (IOException e) {
@@ -64,6 +66,7 @@ public class GithubProvider {
             Response response = client.newCall(request).execute();
             String string = response.body().string();
             GithubUser githubUser = JSON.parseObject(string, GithubUser.class);//自动将string解析为java类对象
+
             return githubUser;
         } catch (IOException e) {
             e.printStackTrace();
