@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Java论坛</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+    <meta http-equiv="Content-Type" charset="text/html;charset=UTF-8"/>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/community.css">
+    <!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="/css/bootstrap-theme.min.css"/>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="/js/bootstrap.min.js" type="application/javascript"></script>
+
+
+</head>
+<!-- 看源码这段功能似乎已被废弃
+     js代码作用：在community.js中，使用localStorage存储了"closable"变量，当未登录用户提交回答时，
+     会自动弹出一个新的登录页面，并将closable设为true，【登陆成功后关闭登录页面】-->
+<script type="application/javascript">
+    window.onload = function () {
+        var closable = window.localStorage.getItem("closable");
+        if (closable == "true") {
+            window.close();
+            window.localStorage.removeItem("closable");
+        }
+    }
+</script>
+<body>
+
+<div th:insert="navigation :: nav"></div>
+
+<div class="container-fluid main profile">
+    <div class="row">
+        <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+            <h3><span class="glyphicon glyphicon-list" aria-hidden="true"></span> 发现</h3>
+
+<!--            <ul class="nav nav-tabs">-->
+<!--                <li role="presentation" th:class="${sort == 'new' || sort == '' ? 'active':''}">-->
+<!--                    <a th:href="@{/(sort='new')}">最新</a>-->
+<!--                </li>-->
+<!--                <li role="presentation" th:class="${sort == 'hot30' ? 'active':''}">-->
+<!--                    <a th:href="@{/(sort='hot30')}">30天最热</a>-->
+<!--                </li>-->
+<!--                <li role="presentation" th:class="${sort == 'hot7' ? 'active':''}">-->
+<!--                    <a th:href="@{/(sort='hot7')}">7天最热</a>-->
+<!--                </li>-->
+<!--                <li role="presentation" th:class="${sort == 'hot' ? 'active':''}">-->
+<!--                    <a th:href="@{/(sort='hot')}">最热</a>-->
+<!--                </li>-->
+<!--                <li role="presentation" th:class="${sort == 'no' ? 'active':''}">-->
+<!--                    <a th:href="@{/(sort='no')}" class="red">消灭零回复</a>-->
+<!--                </li>-->
+<!--            </ul>-->
+
+            <div class="media" th:each="question : ${questions}">
+                <div class="media-left">
+                    <a href="#">
+                        <img class="media-object img-rounded"
+                             th:src="${question.user.avatarUrl}">
+                    </a>
+                </div>
+                <div class="media-body">
+                    <h5 class="media-heading">
+                        <a th:href="@{'/question/'+ ${question.id}}" th:utext="${question.title}"></a>
+                    </h5>
+                    <span class="text-desc">
+                    <span th:text="${question.commentCount}"></span> 个回复 • <span
+                            th:text="${question.viewCount}"></span> 次浏览 • 发布时间 <span
+                            th:text="${#dates.format(question.gmtCreate,'yyyy-MM-dd HH:mm')}"></span> •
+                    <a th:href="@{'/publish/'+${question.id}}" class="community-menu"
+                       th:if="${session.user != null && session.user.id == question.creator}">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true">编辑</span>
+                </a>
+                </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <h3 style="margin-top: 30px;margin-bottom: 30px;">
+                    <span class="glyphicon glyphicon-list" aria-hidden="true"></span> Java论坛项目简介
+                </h3>
+                • 采用SpringMVC架构处理请求，业务处理，以及Thymeleaf模板引擎实现页面显示。 <br>
+                • 基于MyBatis实现对数据库的增删改查。<br>
+                • 采用拦截器调用Session存储用户信息和消息未读数的更新。<br>
+            </div>
+            <!--                <div th:insert="~{notice :: notice}"></div>-->
+            <!--相关问题-->
+            <!--            <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">-->
+<!--            <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">-->
+<!--            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">-->
+<!--                <h3 style="margin-top: 10px;margin-bottom: 30px;">-->
+<!--                    <span class="glyphicon glyphicon-list" aria-hidden="true"></span> 热门标签-->
+<!--                </h3>-->
+<!--                <a th:each="tag : ${tags}" th:href="@{/(page=1,search=${search},tag=${tag},sort=${sort})}"-->
+<!--                   th:text="${tag}" class="community-tag"></a>&lt;!&ndash;,sort=${sort}&ndash;&gt;-->
+<!--            </div>-->
+
+        </div>
+        <!--                <div th:insert="~{side :: side}"></div>-->
+    </div>
+
+    <hr/>
+<!--    <table class="pageHelper">-->
+<!--        <tr class="btn">-->
+
+<!--            <td><a th:href="@{/(page=1,search=${search},tag=${tag},sort=${sort})}">首页</a></td>-->
+<!--            <td th:if="${page.getPrePage()} != '0' "><a href="javascript:;" th:href="@{/(page=${page.getPrePage()},search=${search},tag=${tag},sort=${sort})}" >上一页</a> </td>-->
+<!--            <td th:if="${page.getPrePage()} eq '0' ">上一页</td>-->
+<!--            <td><span th:text="${page.getCurrentPage()}" ></span></td>-->
+<!--            <td>/</td>-->
+<!--            <td><span th:text="${page.getPages()}" > </span></td>-->
+<!--            <td th:if="${page.getNextPage()} eq ${page.getPages()} "><a href="javascript:;" th:href="@{/(page=${page.getNextPage()},search=${search},tag=${tag},sort=${sort})}" >下一页</a></td>-->
+<!--            <td th:if="${page.getNextPage()} != ${page.getPages()} ">下一页</td>-->
+<!--            <td><a href="javascript:;" th:href="@{/(page=${page.getPages()},search=${search},tag=${tag},sort=${sort})}">末页</a></td>-->
+<!--            <td>-->
+<!--                <form action="/" method="get">-->
+<!--                    <input type="hidden" id="nn" th:value="${page.getPages()}">-->
+<!--                    跳转到: <input type="text" id="ss" name="page" value="" style="width: 20px">-->
+<!--                    <input type="hidden"  name ="search" th:value="${search}"/>&lt;!&ndash;+'&tag='+${tag}+'&sort='+${sort}&ndash;&gt;-->
+<!--                    <input type="hidden"  name ="tag" th:value="${tag}"/>-->
+<!--                    <input type="hidden"  name ="sort" th:value="${sort}"/>-->
+<!--                    <input type="submit" onclick="f()" value="确定">-->
+<!--                </form>-->
+<!--            </td>-->
+
+<!--        </tr>-->
+<!--    </table>-->
+</div>
+</body>
+
+</html>
