@@ -21,4 +21,7 @@ public interface QuestionExtMapper {
 
     @Select("select * from question")
     List<Question> selectAll();
+
+    @Select("SELECT * FROM question ORDER BY (comment_count*10+view_count) DESC LIMIT 0,10")
+    List<Question> selectTop10();
 }

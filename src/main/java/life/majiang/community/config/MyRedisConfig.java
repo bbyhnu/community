@@ -32,6 +32,7 @@ public class MyRedisConfig {
         template.setDefaultSerializer(ser);
         return template;
     }
+
     //编写我们自己的template
 //    @Bean
 //    @SuppressWarnings("all")

@@ -4,6 +4,7 @@ import life.majiang.community.mapper.UserMapper;
 import life.majiang.community.model.User;
 import life.majiang.community.model.UserExample;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -40,5 +41,10 @@ public class UserService {
                     .andIdEqualTo(dbUser.getId());
             userMapper.updateByExampleSelective(updateUser, example);
         }
+    }
+    @Cacheable(cacheNames = "user",key = "#creator")
+    public User getUser(Long creator) {
+        User user = userMapper.selectByPrimaryKey(creator);
+        return user;
     }
 }

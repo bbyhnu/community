@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static jdk.nashorn.internal.runtime.regexp.joni.Config.log;
@@ -46,8 +47,10 @@ public class QuestionService {
     @Autowired
     private QuestionExtMapper questionExtMapper;
 
+/*    @Autowired
+    private UserMapper userMapper;*/
     @Autowired
-    private UserMapper userMapper;
+    private UserService userService;
 
     @Autowired
     private QuestionCache questionCache;
@@ -56,8 +59,7 @@ public class QuestionService {
     private RedisTemplate<Object, Question> questionRedisTemplate;
     @Autowired
     private RedisCacheManager redisCacheManager;
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+
     //测试redis
     public Question saveToRedis(){
             Question question = questionMapper.selectByPrimaryKey(1L);
@@ -76,6 +78,7 @@ public class QuestionService {
         Question question = questionMapper.selectByPrimaryKey(id);
         return question;
     }
+
     //自己写的实现分页
     public PageResult<Question> selUserQuestions(Long id, Integer page, Integer size) {
         Page ps = PageHelper.startPage(page, size);
@@ -96,6 +99,15 @@ public class QuestionService {
         return result;
     }
     public PageResult<Question> selAllQuestions(String search, Integer page, Integer size, String tag, String sort) {
+        //top10使用redis缓存
+        if ("top10".equals(sort)){
+            PageResult<Question> result = new PageResult<Question>();
+            result.setRows(findTop10());
+            result.setTotal(1L);
+            result.setPages(1);
+            result.setCurrentPage(1);
+            return result;
+        }
         if (StringUtils.isNotBlank(search)) {
             String[] tags = StringUtils.split(search, " ");
             search = Arrays
@@ -143,13 +155,40 @@ public class QuestionService {
         result.setCurrentPage(page);
         return result;
     }
+    //使用redis缓存热点问题
+    public List<Question> findTop10(){
+        List<Question> questionList = questionRedisTemplate.opsForList().range("questionHot10",0,-1);
+//        redisTemplate.setValueSerializer(redisSerializer);
+        // 防止首次访问该接口有大量用户，造成内存穿透，使redis没有效果
+        if(questionList.isEmpty()==true){
+            synchronized (this){
+                if(questionList.isEmpty()==true){
+                    System.out.println("从mysql中查询Top10中。。。。。。");
+                    // 从数据库中查询数据
+                    questionList = questionExtMapper.selectTop10();
+//                    System.err.println(questionList);
+                    // 放入redis
+                    for (Question question : questionList) {
+                        questionRedisTemplate.opsForList().rightPush("questionHot10",question);//【应该是rightPush】
+                    }
+                    questionRedisTemplate.expire("questionHot10",60*30 , TimeUnit.SECONDS);
+
+                }
+            }
+        }else{
+            System.out.println("从redis中查询Top10中。。。。。。");
+//            System.out.println(questionList);
+        }
+        return questionList;
+    }
     public List<QuestionDTO> fromQuestionToQuestionDTO(List<Question> questions){
 //        List<Question> questions = questionExtMapper.selectBySearch(questionQueryDTO);
 
         List<QuestionDTO> questionDTOList = new ArrayList<>();
 
         for (Question question : questions) {
-            User user = userMapper.selectByPrimaryKey(question.getCreator());
+            Long creator = question.getCreator();
+            User user = userService.getUser(creator);
             QuestionDTO questionDTO = new QuestionDTO();
             BeanUtils.copyProperties(question, questionDTO);//快速把question的属性传递给questionDTO
             questionDTO.setDescription("");
@@ -158,6 +197,8 @@ public class QuestionService {
         }
         return questionDTOList;
     }
+
+
     //返回问题信息，同时带有用户信息
     public List<QuestionDTO> list(List<Question> questions){
 //        List<Question> questions = questionExtMapper.selectBySearch(questionQueryDTO);
@@ -165,7 +206,7 @@ public class QuestionService {
         List<QuestionDTO> questionDTOList = new ArrayList<>();
 
         for (Question question : questions) {
-            User user = userMapper.selectByPrimaryKey(question.getCreator());
+            User user = userService.getUser(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
             BeanUtils.copyProperties(question, questionDTO);//快速把question的属性传递给questionDTO
             questionDTO.setDescription("");
@@ -234,7 +275,7 @@ public class QuestionService {
         List<QuestionDTO> questionDTOList = new ArrayList<>();
 
         for (Question question : questions) {
-            User user = userMapper.selectByPrimaryKey(question.getCreator());
+            User user = userService.getUser(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
             BeanUtils.copyProperties(question, questionDTO);//快速把question的属性传递给questionDTO
             questionDTO.setDescription("");
@@ -283,7 +324,7 @@ public class QuestionService {
         List<QuestionDTO> questionDTOList = new ArrayList<>();
 
         for (Question question : questions) {
-            User user = userMapper.selectByPrimaryKey(question.getCreator());
+            User user = userService.getUser(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
             BeanUtils.copyProperties(question, questionDTO);
             questionDTO.setUser(user);
@@ -301,7 +342,7 @@ public class QuestionService {
         }
         QuestionDTO questionDTO = new QuestionDTO();
         BeanUtils.copyProperties(question, questionDTO);
-        User user = userMapper.selectByPrimaryKey(question.getCreator());
+        User user = userService.getUser(question.getCreator());
         questionDTO.setUser(user);
         return questionDTO;
     }

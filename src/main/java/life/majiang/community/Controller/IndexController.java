@@ -10,6 +10,7 @@ import life.majiang.community.model.PageResult;
 import life.majiang.community.model.Question;
 import life.majiang.community.model.User;
 import life.majiang.community.service.QuestionService;
+import life.majiang.community.service.TagCacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,7 +28,7 @@ public class IndexController {
     @Autowired
     private QuestionService questionService;
     @Autowired
-    private HotTagCache hotTagCache;
+    private TagCacheService tagCacheService;
 
     @GetMapping("/")//什么都不输入，默认访问/ 根目录
     public String index(HttpServletRequest request,
@@ -37,9 +38,10 @@ public class IndexController {
                         @RequestParam(name = "tag", required = false) String tag,
                         @RequestParam(name = "search", required = false) String search,
                         @RequestParam(name = "sort", required = false) String sort){// required = false 不传值后台也不会报错
+
         PageResult<Question> questionPageResult = questionService.selAllQuestions(search, page, size ,tag, sort);
         List<QuestionDTO> questionList = questionService.fromQuestionToQuestionDTO(questionPageResult.getRows());
-        List<String> tags = hotTagCache.getHots();
+        List<String> tags = tagCacheService.getHots();
         model.addAttribute("page", questionPageResult);
 //        List<QuestionDTO> questionList = questionService.list(0,5);
         model.addAttribute("questions", questionList);

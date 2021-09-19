@@ -51,6 +51,9 @@
                 <li role="presentation" th:class="${sort == 'no' ? 'active':''}">
                     <a th:href="@{/(sort='no')}" class="red">消灭零回复</a>
                 </li>
+                <li role="presentation" th:class="${sort == 'top10' ? 'active':''}">
+                    <a th:href="@{/(sort='top10')}" class="red">热点问题</a>
+                </li>
             </ul>
 
             <div class="media" th:each="question : ${questions}">
